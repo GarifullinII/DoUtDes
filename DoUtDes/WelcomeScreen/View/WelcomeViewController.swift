@@ -8,7 +8,12 @@
 import UIKit
 import SwiftUI
 
-class WelcomeViewController: UIViewController {
+protocol WelcomeViewControllerProtocol: AnyObject {
+}
+
+class WelcomeViewController: UIViewController, WelcomeViewControllerProtocol {
+    
+    var presenter: WelcomePresenterProtocol!
     
     // MARK: - UI ELEMENTS
     
@@ -25,9 +30,9 @@ class WelcomeViewController: UIViewController {
         button.backgroundColor = .specialBlackOne
         button.layer.cornerRadius = 12
         button.setTitle("Создать аккаунт", for: .normal)
+        button.addTarget(self, action: #selector(registrationButtonPressed), for: .touchUpInside)
         button.titleLabel?.font = UIFont.robotoBold22()
         button.tintColor = .specialWhiteFour
-        button.addTarget(self, action: #selector(registrationButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -36,9 +41,9 @@ class WelcomeViewController: UIViewController {
         let button = UIButton(type: .system)
         button.backgroundColor = .specialWhiteFour
         button.setTitle("Войти", for: .normal)
+        button.addTarget(self, action: #selector(logInButtonPressed), for: .touchUpInside)
         button.titleLabel?.font = UIFont.robotoBold22()
         button.tintColor = .specialBlue
-        button.addTarget(self, action: #selector(logInButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -50,15 +55,28 @@ class WelcomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupViews()
+        setViews()
         setConstraints()
     }
+}
+
+// MARK: - TARGET ACTIONS
+
+private extension WelcomeViewController {
+    @objc func registrationButtonPressed() {
+        presenter.didTapRegister()
+    }
     
-    // MARK: - PRIVATE METHODS
-    
-    private func setupViews() {
+    @objc func logInButtonPressed() {
+        presenter.didTapLogin()
+    }
+}
+
+// MARK: - SETUP UI
+
+private extension WelcomeViewController {
+    private func setViews() {
         view.backgroundColor = .specialWhiteFour
-        
         view.addSubview(appImageView)
         
         verticalStackView = UIStackView(
@@ -71,20 +89,8 @@ class WelcomeViewController: UIViewController {
         view.addSubview(verticalStackView)
     }
     
-    @objc
-    private func registrationButtonTapped() {
-        //        navigationController?.pushViewController(RegisterViewController(), animated: true)
-    }
+    //MARK: - SET CONSTRAINTS
     
-    @objc
-    private func logInButtonTapped() {
-        //        navigationController?.pushViewController(LoginViewController(), animated: true)
-    }
-}
-
-//MARK: - SET CONSTRAINTS
-
-extension WelcomeViewController {
     private func setConstraints() {
         NSLayoutConstraint.activate([
             appImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 112),

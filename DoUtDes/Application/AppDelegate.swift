@@ -13,7 +13,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
     var navigationController = UINavigationController()
-    let viewController = WelcomeViewController()
+    let viewController = WelcomeAssembly.buildWelcomeScreen()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         

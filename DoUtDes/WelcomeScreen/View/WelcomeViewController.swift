@@ -6,10 +6,8 @@
 //
 
 import UIKit
-import SwiftUI
 
-protocol WelcomeViewControllerProtocol: AnyObject {
-}
+protocol WelcomeViewControllerProtocol: AnyObject {}
 
 class WelcomeViewController: UIViewController, WelcomeViewControllerProtocol {
     
@@ -105,14 +103,6 @@ private extension WelcomeViewController {
             logInButton.widthAnchor.constraint(equalToConstant: 360),
             logInButton.heightAnchor.constraint(equalToConstant: 46),
         ])
-    }
-}
-
-// MARK: - VIEWCONTROLLERPREVIEW
-
-struct ViewControllerPreview: PreviewProvider {
-    static var previews: some View {
-        VCPreview {WelcomeViewController()}
     }
 }
 

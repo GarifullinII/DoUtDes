@@ -20,4 +20,5 @@ extension UIColor {
     static let specialBlackTwo = #colorLiteral(red: 0.474509418, green: 0.4745100141, blue: 0.4874110222, alpha: 1)
     static let specialBlackThree = #colorLiteral(red: 0.6326069832, green: 0.6475488544, blue: 0.6901822686, alpha: 1)
     static let specialBlackFour = #colorLiteral(red: 0.673623383, green: 0.6785958409, blue: 0.6785081029, alpha: 1)
+    static let specialBlackFive = #colorLiteral(red: 0.921431005, green: 0.9214526415, blue: 0.9214410186, alpha: 1)
 }

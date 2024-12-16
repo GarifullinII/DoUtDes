@@ -15,9 +15,25 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
     // MARK: - UI ELEMENTS
     
     var horizontalStackView = UIStackView()
+    var buttons: [UIButton] = []
     
-    let telephoneButton = UIButton.makeButtonWithLabel(title: TitleButton.Telephone.rawValue)
-    let emailButton = UIButton.makeButtonWithLabel(title: TitleButton.Email.rawValue)
+    /// Текущие constraints для подчеркивания
+    var underlineCenterXConstraint: NSLayoutConstraint?
+    var underlineWidthConstraint: NSLayoutConstraint?
+    
+    lazy var underlineView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .specialBlackFour
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    lazy var dividerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .specialBlackFive
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     // MARK: - LIFECYCLE
     
@@ -25,6 +41,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         super.viewDidLoad()
         
         setNavigationBar()
+        setButton()
         setViews()
         setConstraints()
     }
@@ -52,9 +69,49 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         navigationController?.navigationBar.titleTextAttributes = [.font: titleFont]
         title = "Введите телефон или email"
     }
-
+    
+    /// Создаю кнопку
+    func setButton() {
+        for titleButton in TitleButton.allCases {
+            let button = UIButton.makeButtonWithLabel(title: titleButton.rawValue)
+            
+            if titleButton == TitleButton.Telephone {
+                underlineCenterXConstraint = underlineView.centerXAnchor.constraint(equalTo: button.centerXAnchor)
+                underlineWidthConstraint = underlineView.widthAnchor.constraint(equalTo: button.widthAnchor, multiplier: 0.9)
+            }
+            
+            /// Вычисляю ширину кнопки как процент от ширины экрана. Задаю как половину экрана
+            let screenWidth = UIScreen.main.bounds.width
+            let buttonWidth = screenWidth * 0.45
+            
+            NSLayoutConstraint.activate([
+                button.widthAnchor.constraint(equalToConstant: buttonWidth),
+                button.heightAnchor.constraint(equalToConstant: 28)
+            ])
+            
+            button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
+            buttons.append(button)
+        }
+    }
+    
     // MARK: - PRIVATE METHODS
     
+    @objc private func buttonTapped(_ sender: UIButton) {
+        /// Удаляю старые ограничения
+        underlineCenterXConstraint?.isActive = false
+        underlineWidthConstraint?.isActive = false
+        
+        /// Устанавливаю новые ограничения для выбранной кнопки
+        underlineCenterXConstraint = underlineView.centerXAnchor.constraint(equalTo: sender.centerXAnchor)
+        underlineWidthConstraint = underlineView.widthAnchor.constraint(equalTo: sender.widthAnchor, multiplier: 0.9)
+        
+        /// Активирую новые ограничения с анимацией
+        UIView.animate(withDuration: 0.3) {
+            self.underlineCenterXConstraint?.isActive = true
+            self.underlineWidthConstraint?.isActive = true
+            self.view.layoutIfNeeded()
+        }
+    }
 }
 
 // MARK: - SETUP UI
@@ -65,11 +122,15 @@ private extension RegisterViewController {
         view.backgroundColor = .specialWhiteFour
         
         horizontalStackView = UIStackView(
-            arrangedSubviews: [telephoneButton, emailButton],
+            arrangedSubviews: buttons,
             axis: .horizontal,
             spacing: 0
         )
         view.addSubview(horizontalStackView)
+        
+        view.addSubview(underlineView)
+        
+        view.addSubview(dividerView)
     }
     
     //MARK: - SET CONSTRAINTS
@@ -77,7 +138,16 @@ private extension RegisterViewController {
     private func setConstraints() {
         NSLayoutConstraint.activate([
             horizontalStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            horizontalStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            horizontalStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            
+            underlineCenterXConstraint!,
+            underlineWidthConstraint!,
+            underlineView.topAnchor.constraint(equalTo: horizontalStackView.bottomAnchor, constant: 8),
+            underlineView.heightAnchor.constraint(equalToConstant: 2),
+            
+            dividerView.centerYAnchor.constraint(equalTo: underlineView.centerYAnchor),
+            dividerView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            dividerView.heightAnchor.constraint(equalToConstant: 1),
         ])
     }
 }

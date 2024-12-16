@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum TitleButton: String {
+enum TitleButton: String, CaseIterable {
     case Telephone = "Телефон"
     case Email = "Email"
 }

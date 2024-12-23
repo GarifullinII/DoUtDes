@@ -83,7 +83,8 @@ private extension WelcomeViewController {
                 logInButton
             ],
             axis: .vertical,
-            spacing: 4)
+            spacing: 4,
+            distribution: .fillEqually)
         view.addSubview(verticalStackView)
     }
     

@@ -8,10 +8,10 @@
 import UIKit
 
 extension UIButton {
-    static func makeButtonWithLabel (title: String) -> UIButton {
+    static func makeButtonWithLabel(title: String) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
-        button.setTitleColor(.specialBlackOne, for: .normal)
+        button.setTitleColor(.specialBlackFour, for: .normal)
         button.titleLabel?.font = .robotoMedium16()
         button.translatesAutoresizingMaskIntoConstraints = false
         return button

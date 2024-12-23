@@ -14,12 +14,43 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
     
     // MARK: - UI ELEMENTS
     
-    var horizontalStackView = UIStackView()
-    var buttons: [UIButton] = []
+    var buttonStackView = UIStackView()
     
-    /// Текущие constraints для подчеркивания
-    var underlineCenterXConstraint: NSLayoutConstraint?
-    var underlineWidthConstraint: NSLayoutConstraint?
+    lazy var phoneButton: UIButton = UIButton.makeButtonWithLabel(title: "Телефон")
+    lazy var emailButton: UIButton = UIButton.makeButtonWithLabel(title: "Email")
+    
+    lazy var nextButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Далее", for: .normal)
+        button.setTitleColor(.specialWhiteFour, for: .normal)
+        button.titleLabel?.font = .robotoBold22()
+        button.backgroundColor = .specialBlackFive
+        button.layer.cornerRadius = 10
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    lazy var phoneTextField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "Номер телефона"
+        textField.borderStyle = .roundedRect
+        textField.backgroundColor = .specialBlackFive
+        textField.keyboardType = .phonePad
+        textField.isHidden = true
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        return textField
+    }()
+    
+    lazy var emailTextField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "Электронный адрес"
+        textField.borderStyle = .roundedRect
+        textField.backgroundColor = .specialBlackFive
+        textField.keyboardType = .emailAddress
+        textField.isHidden = true
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        return textField
+    }()
     
     lazy var underlineView: UIView = {
         let view = UIView()
@@ -35,34 +66,38 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         return view
     }()
     
-    // MARK: - LIFECYCLE
+    var underlineCenterXConstraint: NSLayoutConstraint?
+    var underlineWidthConstraint: NSLayoutConstraint?
+    
+    lazy var policyOfConfidentialityLabel: UILabel = {
+       let label = UILabel()
+        label.text = "Нажимая «Далее»: вы принимаете Условия использования и Политику конфиденциальности"
+        label.textColor = .specialBlackFour
+        label.font = .robotoBold16()
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.5
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .specialWhiteFour
         
-        setNavigationBar()
-        setButton()
-        setViews()
-        setConstraints()
+        setupNavigationBar()
+        setupPolicyOfConfidentialityLabel()
+        setupButtons()
+        setupUnderline()
+        setupDivider()
+        setupTextFields()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    /// Панель навигации
+    func setupNavigationBar() {
+        navigationController?.navigationBar.tintColor = .specialBlackOne
         
-        /// Убираю title в backButtonTitle
-        navigationController?.navigationBar.topItem?.backButtonTitle = ""
-    }
-    
-    // MARK: - TARGET ACTIONS
-    
-    // MARK: - METHODS
-    
-    /// Настраиваю панель навигации
-    func setNavigationBar() {
-        /// Устанавливаю цвет в navigationBar
-        navigationController?.navigationBar.tintColor = .black
-        
-        /// Устанавливаю шрифт title в navigationBar и изменяю title
         guard let titleFont = UIFont.robotoBold22() else {
             return
         }
@@ -70,93 +105,134 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         title = "Введите телефон или email"
     }
     
-    /// Создаю кнопку
-    func setButton() {
-        for titleButton in TitleButton.allCases {
-            let button = UIButton.makeButtonWithLabel(title: titleButton.rawValue)
-            
-            if titleButton == TitleButton.Telephone {
-                underlineCenterXConstraint = underlineView.centerXAnchor.constraint(equalTo: button.centerXAnchor)
-                underlineWidthConstraint = underlineView.widthAnchor.constraint(equalTo: button.widthAnchor, multiplier: 0.9)
-            }
-            
-            /// Вычисляю ширину кнопки как процент от ширины экрана. Задаю как половину экрана
-            let screenWidth = UIScreen.main.bounds.width
-            let buttonWidth = screenWidth * 0.45
-            
-            NSLayoutConstraint.activate([
-                button.widthAnchor.constraint(equalToConstant: buttonWidth),
-                button.heightAnchor.constraint(equalToConstant: 28)
-            ])
-            
-            button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
-            buttons.append(button)
-        }
-    }
-    
     // MARK: - PRIVATE METHODS
     
+    /// Кнопки - телефон, email и далее
+    private func setupButtons() {
+        
+        buttonStackView = UIStackView(
+            arrangedSubviews: [
+                phoneButton,
+                emailButton
+            ],
+            axis: .horizontal,
+            spacing: 100,
+            distribution: .fillEqually)
+        
+        view.addSubview(buttonStackView)
+        
+        view.addSubview(nextButton)
+        
+        NSLayoutConstraint.activate([
+            buttonStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            buttonStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            
+            nextButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            nextButton.bottomAnchor.constraint(equalTo: policyOfConfidentialityLabel.topAnchor, constant: -16),
+            nextButton.heightAnchor.constraint(equalToConstant: 46)
+        ])
+        
+        phoneButton.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
+        emailButton.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
+    }
+    
+    /// Подчеркивание под выбранной кнопкой
+    private func setupUnderline() {
+        view.addSubview(underlineView)
+        
+        underlineCenterXConstraint = underlineView.centerXAnchor.constraint(equalTo: phoneButton.centerXAnchor)
+        underlineWidthConstraint = underlineView.widthAnchor.constraint(equalTo: phoneButton.widthAnchor)
+        
+        NSLayoutConstraint.activate([
+            underlineCenterXConstraint!,
+            underlineWidthConstraint!,
+            underlineView.topAnchor.constraint(equalTo: buttonStackView.bottomAnchor, constant: 8),
+            underlineView.heightAnchor.constraint(equalToConstant: 2),
+        ])
+        
+        updateButtonSelection(selectedButton: phoneButton)
+        toggleTextFields(selectedButton: phoneButton)
+    }
+    
+    /// Поля ввода на экране
+    private func setupTextFields() {
+        view.addSubview(phoneTextField)
+        view.addSubview(emailTextField)
+        
+        NSLayoutConstraint.activate([
+            phoneTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            phoneTextField.topAnchor.constraint(equalTo: underlineView.bottomAnchor, constant: 24),
+            phoneTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            phoneTextField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            phoneTextField.heightAnchor.constraint(equalToConstant: 38),
+            
+            emailTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            emailTextField.topAnchor.constraint(equalTo: underlineView.bottomAnchor, constant: 24),
+            emailTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            emailTextField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emailTextField.heightAnchor.constraint(equalToConstant: 38),
+        ])
+    }
+    
+    /// divider
+    private func setupDivider() {
+        view.addSubview(dividerView)
+        
+        NSLayoutConstraint.activate([
+            dividerView.centerYAnchor.constraint(equalTo: underlineView.centerYAnchor),
+            dividerView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            dividerView.heightAnchor.constraint(equalToConstant: 1),
+        ])
+    }
+    
+    /// Label политика конфиденциальности
+    private func setupPolicyOfConfidentialityLabel() {
+        view.addSubview(policyOfConfidentialityLabel)
+        
+        NSLayoutConstraint.activate([
+            policyOfConfidentialityLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            policyOfConfidentialityLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            policyOfConfidentialityLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            policyOfConfidentialityLabel.heightAnchor.constraint(equalToConstant: 40)
+        ])
+    }
+    
     @objc private func buttonTapped(_ sender: UIButton) {
-        /// Удаляю старые ограничения
         underlineCenterXConstraint?.isActive = false
         underlineWidthConstraint?.isActive = false
         
-        /// Устанавливаю новые ограничения для выбранной кнопки
         underlineCenterXConstraint = underlineView.centerXAnchor.constraint(equalTo: sender.centerXAnchor)
-        underlineWidthConstraint = underlineView.widthAnchor.constraint(equalTo: sender.widthAnchor, multiplier: 0.9)
+        underlineWidthConstraint = underlineView.widthAnchor.constraint(equalTo: sender.widthAnchor)
         
-        /// Активирую новые ограничения с анимацией
+        updateButtonSelection(selectedButton: sender)
+        toggleTextFields(selectedButton: sender)
+        
         UIView.animate(withDuration: 0.3) {
             self.underlineCenterXConstraint?.isActive = true
             self.underlineWidthConstraint?.isActive = true
             self.view.layoutIfNeeded()
         }
     }
-}
-
-// MARK: - SETUP UI
-
-private extension RegisterViewController {
-    private func setViews() {
-        /// Изменяю цвет фона экрана
-        view.backgroundColor = .specialWhiteFour
+    
+    private func updateButtonSelection(selectedButton: UIButton) {
+        phoneButton.setTitleColor(.specialBlackFour, for: .normal)
+        emailButton.setTitleColor(.specialBlackFour, for: .normal)
         
-        horizontalStackView = UIStackView(
-            arrangedSubviews: buttons,
-            axis: .horizontal,
-            spacing: 0
-        )
-        view.addSubview(horizontalStackView)
-        
-        view.addSubview(underlineView)
-        
-        view.addSubview(dividerView)
+        selectedButton.setTitleColor(.specialBlackOne, for: .normal)
     }
     
-    //MARK: - SET CONSTRAINTS
-    
-    private func setConstraints() {
-        NSLayoutConstraint.activate([
-            horizontalStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            horizontalStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            
-            underlineCenterXConstraint!,
-            underlineWidthConstraint!,
-            underlineView.topAnchor.constraint(equalTo: horizontalStackView.bottomAnchor, constant: 8),
-            underlineView.heightAnchor.constraint(equalToConstant: 2),
-            
-            dividerView.centerYAnchor.constraint(equalTo: underlineView.centerYAnchor),
-            dividerView.widthAnchor.constraint(equalTo: view.widthAnchor),
-            dividerView.heightAnchor.constraint(equalToConstant: 1),
-        ])
+    private func toggleTextFields(selectedButton: UIButton) {
+        phoneTextField.isHidden = selectedButton != phoneButton
+        emailTextField.isHidden = selectedButton != emailButton
     }
 }
 
 // MARK: - VIEWCONTROLLERPREVIEW
 
-struct ViewControllerPreview: PreviewProvider {
-    static var previews: some View {
-        VCPreview {RegisterViewController()}
-    }
-}
+//struct ViewControllerPreview: PreviewProvider {
+//    static var previews: some View {
+//        VCPreview {RegisterViewController()}
+//    }
+//}
 

@@ -16,8 +16,8 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
     
     var buttonStackView = UIStackView()
     
-    lazy var phoneButton: UIButton = UIButton.makeButtonWithLabel(title: "Телефон")
-    lazy var emailButton: UIButton = UIButton.makeButtonWithLabel(title: "Email")
+    lazy var phoneButton: UIButton = UIButton.makeButtonWithLabel(title: TitleButton.Telephone.rawValue)
+    lazy var emailButton: UIButton = UIButton.makeButtonWithLabel(title: TitleButton.Email.rawValue)
     
     lazy var nextButton: UIButton = {
         let button = UIButton(type: .system)
@@ -26,6 +26,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         button.titleLabel?.font = .robotoBold22()
         button.backgroundColor = .specialBlackFive
         button.layer.cornerRadius = 10
+        button.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -70,7 +71,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
     var underlineWidthConstraint: NSLayoutConstraint?
     
     lazy var policyOfConfidentialityLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.text = "Нажимая «Далее»: вы принимаете Условия использования и Политику конфиденциальности"
         label.textColor = .specialBlackFour
         label.font = .robotoBold16()
@@ -86,6 +87,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         super.viewDidLoad()
         view.backgroundColor = .specialWhiteFour
         
+        setupTextFieldDelegate()
         setupNavigationBar()
         setupPolicyOfConfidentialityLabel()
         setupButtons()
@@ -94,7 +96,13 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         setupTextFields()
     }
     
-    /// Панель навигации
+    // TextField delegate
+    func setupTextFieldDelegate() {
+        phoneTextField.delegate = self
+        emailTextField.delegate = self
+    }
+    
+    // Панель навигации
     func setupNavigationBar() {
         navigationController?.navigationBar.tintColor = .specialBlackOne
         
@@ -107,7 +115,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
     
     // MARK: - PRIVATE METHODS
     
-    /// Кнопки - телефон, email и далее
+    // Кнопки - телефон, email и далее
     private func setupButtons() {
         
         buttonStackView = UIStackView(
@@ -137,7 +145,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         emailButton.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
     }
     
-    /// Подчеркивание под выбранной кнопкой
+    // Подчеркивание под выбранной кнопкой
     private func setupUnderline() {
         view.addSubview(underlineView)
         
@@ -155,7 +163,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         toggleTextFields(selectedButton: phoneButton)
     }
     
-    /// Поля ввода на экране
+    // Поля ввода на экране
     private func setupTextFields() {
         view.addSubview(phoneTextField)
         view.addSubview(emailTextField)
@@ -175,7 +183,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         ])
     }
     
-    /// divider
+    // Divider
     private func setupDivider() {
         view.addSubview(dividerView)
         
@@ -186,7 +194,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         ])
     }
     
-    /// Label политика конфиденциальности
+    // Label политика конфиденциальности
     private func setupPolicyOfConfidentialityLabel() {
         view.addSubview(policyOfConfidentialityLabel)
         
@@ -196,6 +204,18 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
             policyOfConfidentialityLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             policyOfConfidentialityLabel.heightAnchor.constraint(equalToConstant: 40)
         ])
+    }
+    
+    private func updateButtonSelection(selectedButton: UIButton) {
+        phoneButton.setTitleColor(.specialBlackFour, for: .normal)
+        emailButton.setTitleColor(.specialBlackFour, for: .normal)
+        
+        selectedButton.setTitleColor(.specialBlackOne, for: .normal)
+    }
+    
+    private func toggleTextFields(selectedButton: UIButton) {
+        phoneTextField.isHidden = selectedButton != phoneButton
+        emailTextField.isHidden = selectedButton != emailButton
     }
     
     @objc private func buttonTapped(_ sender: UIButton) {
@@ -215,16 +235,23 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         }
     }
     
-    private func updateButtonSelection(selectedButton: UIButton) {
-        phoneButton.setTitleColor(.specialBlackFour, for: .normal)
-        emailButton.setTitleColor(.specialBlackFour, for: .normal)
-        
-        selectedButton.setTitleColor(.specialBlackOne, for: .normal)
+    @objc private func nextButtonTapped() {
+        guard let phoneNumber = phoneTextField.text,
+              let email = emailTextField.text else { return }
+
+        // Сохранение данных в CoreData или FirebaseCore
     }
-    
-    private func toggleTextFields(selectedButton: UIButton) {
-        phoneTextField.isHidden = selectedButton != phoneButton
-        emailTextField.isHidden = selectedButton != emailButton
+}
+
+// MARK: - UITEXTFIELDDELEGATE
+
+extension RegisterViewController: UITextFieldDelegate {
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        let isPhoneNumberEntered = !(phoneTextField.text ?? "").isEmpty
+        let isEmailEntered = !(emailTextField.text ?? "").isEmpty
+        
+        nextButton.isEnabled = isPhoneNumberEntered || isEmailEntered
+        nextButton.backgroundColor = nextButton.isEnabled ? .specialBlackOne : .specialWhiteFour
     }
 }
 

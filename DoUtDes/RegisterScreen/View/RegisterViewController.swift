@@ -15,6 +15,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
     // MARK: - UI ELEMENTS
     
     var buttonStackView = UIStackView()
+    var buttonWithLabelStackView = UIStackView()
     
     lazy var phoneButton: UIButton = UIButton.makeButtonWithLabel(title: TitleButton.Telephone.rawValue)
     lazy var emailButton: UIButton = UIButton.makeButtonWithLabel(title: TitleButton.Email.rawValue)
@@ -89,7 +90,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         
         setupTextFieldDelegate()
         setupNavigationBar()
-        setupPolicyOfConfidentialityLabel()
+        setupButtonWithLabelStackView()
         setupButtons()
         setupUnderline()
         setupDivider()
@@ -115,9 +116,8 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
     
     // MARK: - PRIVATE METHODS
     
-    // Кнопки - телефон, email и далее
+    // Кнопки - телефон, email
     private func setupButtons() {
-        
         buttonStackView = UIStackView(
             arrangedSubviews: [
                 phoneButton,
@@ -129,20 +129,35 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         
         view.addSubview(buttonStackView)
         
-        view.addSubview(nextButton)
-        
         NSLayoutConstraint.activate([
             buttonStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             buttonStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            
-            nextButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            nextButton.bottomAnchor.constraint(equalTo: policyOfConfidentialityLabel.topAnchor, constant: -16),
-            nextButton.heightAnchor.constraint(equalToConstant: 46)
         ])
         
         phoneButton.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
         emailButton.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
+    }
+    
+    // Кнопка "Далее" с политикой конфиденциальности
+    private func setupButtonWithLabelStackView() {
+        buttonWithLabelStackView = UIStackView(
+            arrangedSubviews: [
+                nextButton,
+                policyOfConfidentialityLabel
+            ],
+            axis: .vertical,
+            spacing: 16,
+            distribution: .fillEqually
+        )
+        
+        view.addSubview(buttonWithLabelStackView)
+        
+        NSLayoutConstraint.activate([
+            buttonWithLabelStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            buttonWithLabelStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            buttonWithLabelStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            buttonWithLabelStackView.heightAnchor.constraint(equalToConstant: 102)
+        ])
     }
     
     // Подчеркивание под выбранной кнопкой
@@ -194,18 +209,6 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
         ])
     }
     
-    // Label политика конфиденциальности
-    private func setupPolicyOfConfidentialityLabel() {
-        view.addSubview(policyOfConfidentialityLabel)
-        
-        NSLayoutConstraint.activate([
-            policyOfConfidentialityLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            policyOfConfidentialityLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            policyOfConfidentialityLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            policyOfConfidentialityLabel.heightAnchor.constraint(equalToConstant: 40)
-        ])
-    }
-    
     private func updateButtonSelection(selectedButton: UIButton) {
         phoneButton.setTitleColor(.specialBlackFour, for: .normal)
         emailButton.setTitleColor(.specialBlackFour, for: .normal)
@@ -238,7 +241,7 @@ class RegisterViewController: UIViewController, RegisterViewControllerProtocol {
     @objc private func nextButtonTapped() {
         guard let phoneNumber = phoneTextField.text,
               let email = emailTextField.text else { return }
-
+        
         // Сохранение данных в CoreData или FirebaseCore
     }
 }
